@@ -55,7 +55,7 @@ class _JumpingContainersState extends State<JumpingContainers> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(isWinner ? "🎉 Win!" : "Better luck next time"),
-        duration: const Duration(seconds: 1),
+        duration: const Duration(milliseconds: 500),
       ),
     );
   }
