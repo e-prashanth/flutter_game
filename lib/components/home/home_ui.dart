@@ -18,7 +18,7 @@ class _HomeUIState extends State<HomeUI> {
         child: Scaffold(
           body: OrientationBuilder(
             builder: (context, orientation) {
-              return Center(child: _landingPage());
+              return _landingPage(orientation);
             },
           ),
         ),
@@ -26,20 +26,20 @@ class _HomeUIState extends State<HomeUI> {
     );
   }
 
-  Widget _landingPage() {
+  Widget _landingPage(Orientation orientation) {
+    final isPortrait = orientation == Orientation.portrait;
+    final children = <Widget>[
+      Text("Help me to find Jerry!", style: Theme.of(context).textTheme.headlineLarge),
+      Icon(Icons.person, size: 250),
+      ElevatedButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GamingPage(startTimerOnInit: true))), child: Text("Play")),
+    ];
     return Container(
       width: double.infinity,
+      height: double.infinity,
       color: Theme.of(context).colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Text("Help me to find Jerry!", style: Theme.of(context).textTheme.headlineLarge),
-            Icon(Icons.person, size: 350),
-            ElevatedButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GamingPage())), child: Text("Play")),
-          ],
-        ),
+        child: isPortrait ? Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: children) : Column(mainAxisAlignment: MainAxisAlignment.center, children: children),
       ),
     );
   }
