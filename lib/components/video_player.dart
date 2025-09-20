@@ -18,12 +18,24 @@ class _LocalVideoPlayerState extends State<LocalVideoPlayer> {
   void initState() {
     super.initState();
 
-    // Load video from assets
-    _controller = VideoPlayerController.asset("assets/video/sample_video.mp4")
-      ..initialize().then((_) {
-        setState(() {}); // Refresh to show video
-        _controller.play();
-      });
+    _controller =
+        VideoPlayerController.asset("assets/video/sample_video.mp4")
+          ..setLooping(false)
+          ..setVolume(0.0)
+          ..initialize().then((_) async {
+            if (mounted) {
+              setState(() {}); // Refresh to show video
+              try {
+                await _controller.play();
+              } catch (e) {
+                debugPrint(
+                  'Video play error: '
+                  '${_controller.value.errorDescription ?? e.toString()}',
+                );
+                // Optionally show a dialog or fallback UI here
+              }
+            }
+          });
     _controller.addListener(_videoListener);
   }
 
@@ -43,7 +55,15 @@ class _LocalVideoPlayerState extends State<LocalVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(child: _controller.value.isInitialized ? AspectRatio(aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller)) : const CircularProgressIndicator()),
+      backgroundColor: Colors.black,
+      body: Center(
+        child:
+            _controller.value.hasError
+                ? Text('Video error: ${_controller.value.errorDescription}', style: const TextStyle(color: Colors.red))
+                : _controller.value.isInitialized
+                ? AspectRatio(aspectRatio: _controller.value.aspectRatio, child: VideoPlayer(_controller))
+                : const CircularProgressIndicator(color: Colors.white),
+      ),
     );
   }
 }

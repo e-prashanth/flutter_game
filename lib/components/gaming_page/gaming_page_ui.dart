@@ -18,8 +18,8 @@ class _GamingPageState extends State<GamingPage> {
   final random = Random();
 
   Timer? _gameTimer;
-  final int _totalSeconds = 300; // 5 minutes
-  int _secondsLeft = 300;
+  final int _totalSeconds = 30; // 5 minutes
+  int _secondsLeft = 30;
   bool _showTimer = false;
 
   @override
@@ -109,7 +109,40 @@ class _GamingPageState extends State<GamingPage> {
 
   void _handleTap(int index) {
     final isWinner = index == hiddenIndex;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isWinner ? "🎉 Win!" : "Better luck next time"), duration: const Duration(milliseconds: 500)));
+    if (isWinner) {
+      _gameTimer?.cancel();
+      final int timeTaken = _totalSeconds - _secondsLeft;
+      final String timeStr = _formatTime(timeTaken);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder:
+            (context) => AlertDialog(
+              title: const Text("🎉 Congratulations!"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [const Text("You found Jerry! Great job!"), const SizedBox(height: 12), Text("Time taken: $timeStr", style: const TextStyle(fontWeight: FontWeight.bold))],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _startGameTimer();
+                  },
+                  child: const Text("Play Again"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
+                  child: const Text("Home"),
+                ),
+              ],
+            ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Better luck next time"), duration: Duration(milliseconds: 500)));
+    }
   }
 
   @override
@@ -118,8 +151,22 @@ class _GamingPageState extends State<GamingPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+          onPressed: () async {
+            final shouldGoHome = await showDialog<bool>(
+              context: context,
+              builder:
+                  (context) => AlertDialog(
+                    title: const Text('Exit Game'),
+                    content: const Text('Are you sure you want to go home?'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancel')),
+                      TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Home')),
+                    ],
+                  ),
+            );
+            if (shouldGoHome == true) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
           },
           icon: Icon(Icons.home),
         ),
